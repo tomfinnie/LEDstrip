@@ -1,6 +1,6 @@
 #include <FastSPI_LED.h>
 
-#define NUM_LEDS 28
+#define NUM_LEDS 268
 
 // Sometimes chipsets wire in a backwards sort of way
 struct CRGB { unsigned char g; unsigned char r; unsigned char b; };
@@ -59,9 +59,9 @@ void loop(){
   int speed = 1;
   int pot0 = A1;
   int pot1 = A2;
-  int pot2 = A0;
-  int pot3 = A4;
-  int pot4 = A3;
+  int pot2 = A3;
+  int pot3 = A0;
+  int pot4 = A4;
 
   int potValue0 = 0;
   int potValue1 = 0;
@@ -134,9 +134,9 @@ void loop(){
     potValue0 = analogRead(pot0)/4;
     potValue1 = analogRead(pot1)/4;
     for(int i = 0 ; i < NUM_LEDS; i++ ) {
-      leds[i].r = potValue1;
+      leds[i].r = potValue0;
       leds[i].g = potValue0;
-      leds[i].b = 255;
+      leds[i].b = potValue0;
     }
   FastSPI_LED.show();
   if(dip() != 2){break;}
@@ -168,12 +168,13 @@ void loop(){
 // USER COLOUR SCROLL
 
   while( dip() == 4 ){
-    leds[0].r = analogRead(pot0)/4;
-    leds[0].g = analogRead(pot1)/4;
+    leds[0].r = analogRead(pot1)/4;
+    leds[0].g = analogRead(pot2)/4;
+    leds[0].b = analogRead(pot3)/4;
     steparray ();
     FastSPI_LED.show();
     if(dip() != 4){break;}
-    delay(50);
+    delay(analogRead(pot0)/4);
   }
 
 //BENMODE
@@ -197,7 +198,7 @@ void loop(){
   
     leds[0].r = 255;
     leds[0].g = 255;
-    leds[0].b = 127;
+    leds[0].b = 255 / benspeed;
     
     while(leds[0].r > 1){
       
@@ -221,13 +222,33 @@ void loop(){
     }
   }
     
+//RANDOMIZER
+
+  while( dip() == 6 ){
+    
+    memset(leds, 127, 3);
+    randomSeed(analogRead(A5));
+    
+    while( dip() == 6 ){
+      potValue0 = analogRead(pot0)/8;
+      potValue1 = analogRead(pot1)/4;
+      leds[0].r += random(-potValue0,potValue0);
+      leds[0].g += random(-potValue0,potValue0);
+      leds[0].b += random(-potValue0,potValue0);
+      FastSPI_LED.show();
+      steparray ();
+      if(dip() != 6){break;}
+      delay (potValue1);
+    }
+  }
+
 //STANDING BY....
-  while( dip() > 5 ){
+  while( dip() > 6 ){
     for(int i = 0 ; i < NUM_LEDS; i++ ) {
       memset(leds, 0, NUM_LEDS * 3);
       leds[i].g = 20;
       FastSPI_LED.show();
-      if(dip() <= 5){break;}
+      if(dip() <= 6){break;}
       delay(50);
     }
   }
@@ -251,3 +272,5 @@ void steparray (){
     
   }
 }
+
+
