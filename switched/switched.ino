@@ -102,8 +102,11 @@ void loop(){
 
   // RGB PULSES WITH GAPS
   while( dip() == 10 ){
-
+	
+	//blank first LED. 3 for rgb.
     memset(leds, 0, 3);
+	
+	//should be rewritten with setHue (easy)
 
     for(int j = -1; j < 8; j++ ){
       for(int k = 0; k < (groupSize); k++){
@@ -148,6 +151,8 @@ void loop(){
 
   //RAINBOWS IN DA HOUSE
 
+  //deprecated
+
   while(dip() == 1 ){
 
     //speed =  15;
@@ -188,6 +193,11 @@ void loop(){
 
   //FULLBRITE
 
+  //Electronics note: this will draw 3A per meter at brightness = 255
+  //Make sure your PSU / battery is up to this load. You may also have
+  //problems with voltage drop if you run long strips without suplemental
+  //power injection.
+
   while( dip() == 2 ){
     potValue0 = analogRead(pot0)/4;
     potValue1 = analogRead(pot1)/4;
@@ -204,6 +214,9 @@ void loop(){
   }
 
   //STROBE
+
+  //Needs redoing for setHue()
+  //Politics note; this will piss people off, a lot.
 
   while( dip() == 3 ){
     potValue0 = analogRead(pot0)/4;
@@ -471,6 +484,7 @@ void loop(){
 
  //BATTERY LEVEL
 //http://www.candlepowerforums.com/vb/showthread.php?81044-Li-Ion-remaining-capacity-vs-voltage
+//relies on exact 5v supply for any semblance of accuracy
 
   while (dip() == 12)
   {
@@ -478,11 +492,11 @@ void loop(){
 	  int batteryRaw = analogRead(batteryMonitor);
 	  int batteryPercentage = 0;
 
-	  if (batteryRaw > 860)
+	  if (batteryRaw > 860) // = 4.2/5 * 1024
 	  {batteryPercentage = 100;}
 
-	  else if (batteryRaw > 819)
-	  {batteryPercentage = 80 + ((batteryRaw - 819) / 2);}
+	  else if (batteryRaw > 819) // = 4/5 * 1024
+	  {batteryPercentage = 80 + ((batteryRaw - 819) / 2);} 
 
 	  else
 	  {batteryPercentage = batteryRaw - 739;}
@@ -546,6 +560,9 @@ int dip ()
       serialDip = serialArray[0];
     }
     
+	//bytes 1..3 need to be rewritten to be absolute rather than relative, not sure
+	//why I thought that was a good idea
+
     if (serialArray[1] > 0)
     { 
       speed = speed + serialArray[1] - 128;
@@ -583,6 +600,9 @@ int dip ()
   
   return (serialDip);
 }
+
+//steparray needs much work. The intent is that to save processing at higher speeds
+//it will step the array to segments per loop and per fastspi.show. It doesn't work.
 
 void steparray()
 {
