@@ -26,7 +26,8 @@ RgbFColor;
 #define pot1 A2
 #define pot2 A3
 #define pot3 A0
-#define pot4 A4 
+#define pot4 A4
+#define batteryMonitor A4
 #define analogPin A5
 
 #define aButton 4
@@ -39,7 +40,7 @@ RgbFColor;
 unsigned long startPhase = 0;
 char jumpState = 0;
 
-int serialDip = 1;
+int serialDip = 12;
 int speed = 100;
 int groupSize = 5;
 int inverseGroupSize = 51;
@@ -47,6 +48,8 @@ int red = 0;
 int green = 0;
 int blue = 127;
 float benspeed = 1.3;
+int loopHue = 0;
+int brightness = 255;
 
 void setup()
 {
@@ -153,10 +156,10 @@ void loop(){
     leds[0].r = 255;
 
     for(int j = 0; j < 6; j++ ){
+	  if(dip() != 1){
+         break;
+      }
       for(int k = 0; k < (groupSize); k++){
-        if(dip() != 1){
-          break;
-        }
         switch(j) {
         case 0: 
           leds[0].g = leds[0].g + inverseGroupSize; 
@@ -189,9 +192,9 @@ void loop(){
     potValue0 = analogRead(pot0)/4;
     potValue1 = analogRead(pot1)/4;
     for(int i = 0 ; i < NUM_LEDS; i++ ) {
-      leds[i].r = potValue0;
-      leds[i].g = potValue0;
-      leds[i].b = potValue0;
+      leds[i].r = brightness;
+      leds[i].g = brightness;
+      leds[i].b = brightness;
     }
     FastSPI_LED.show();
     if(dip() != 2){
@@ -275,7 +278,7 @@ void loop(){
 
     memset(leds, 0, 3);
 
-    for(int j = 0; j < (potValue1); j++){
+	for(int j = 0; j < (groupSize); j++){
       //FastSPI_LED.show();
       steparray ();
       if(dip() != 5){
@@ -289,22 +292,10 @@ void loop(){
 
   while( dip() == 6 ){
 
-    phaseDelay();
-    memset(leds, 127, 3);
-    randomSeed(analogRead(A5));
-
-    while( dip() == 6 ){
-      potValue1 = analogRead(pot1)/4;
-      leds[0].r += random(-potValue1,potValue1+1);
-      leds[0].g += random(-potValue1,potValue1+1);
-      leds[0].b += random(-potValue1,potValue1+1);
-      FastSPI_LED.show();
-      steparray ();
-      if(dip() != 6){
-        break;
-      }
-      phaseDelay();
-    }
+	loopHue += random(2*groupSize) - groupSize;
+	loopHue = abs(loopHue) % 1536 ;
+	setHue (loopHue,255);
+	steparray ();
   }
 
   //MSGEQ7 DRIVEN 1
@@ -434,8 +425,85 @@ void loop(){
 
   }
 
+  //MATRIX
+
+  while( dip() == 10 ){
+    
+	setHue (random(0,1535),255);
+
+
+    while((leds[0].r + leds[0].g +leds[0].b) > 1){
+
+      leds[0].r = leds[0].r / benspeed;
+	  leds[0].g = leds[0].g / benspeed;
+	  leds[0].b = leds[0].b / benspeed;
+
+      steparray ();
+      if(dip() != 10){
+        break;
+      }
+      //phaseDelay();
+    }
+
+    memset(leds, 0, 3);
+
+	for(int j = 0; j < (groupSize); j++){
+      //FastSPI_LED.show();
+      steparray ();
+      if(dip() != 10){
+        break;
+      }
+      //phaseDelay();
+    }
+  }
+	 
+  //NEW RAINBOW
+
+  while (dip() == 11)
+  {
+	  for(int i = 0; i < 1535; i+= inverseGroupSize)
+	  {
+		  setHue(i,brightness);
+		  steparray();
+	  }
+  }
+
+
+ //BATTERY LEVEL
+//http://www.candlepowerforums.com/vb/showthread.php?81044-Li-Ion-remaining-capacity-vs-voltage
+
+  while (dip() == 12)
+  {
+	  memset(leds, 0, NUM_LEDS * 3);
+	  int batteryRaw = analogRead(batteryMonitor);
+	  int batteryPercentage = 0;
+
+	  if (batteryRaw > 860)
+	  {batteryPercentage = 100;}
+
+	  else if (batteryRaw > 819)
+	  {batteryPercentage = 80 + ((batteryRaw - 819) / 2);}
+
+	  else
+	  {batteryPercentage = batteryRaw - 739;}
+
+	  for(int i = 0 ; i < (NUM_LEDS*batteryPercentage)/100 ; i++ )
+	  {
+		  leds[i].r = 50;
+	  }
+
+	  FastSPI_LED.show();
+	  Serial.print("Battery level is ");
+	  Serial.println(batteryPercentage);
+	  delay(1000);
+
+  }
+
+
+
+
   //STANDING BY....
-  while( dip() > 10 )
+  while( dip() > 13 )
   {
     for(int i = 0 ; i < NUM_LEDS; i++ ) 
     {
@@ -467,7 +535,7 @@ int dip ()
   byte readCount = Serial.available();
   int serialArray[readCount+1];
 
-  if (readCount > 2) 
+  if (readCount > 4) 
   {  
     for (int i = 0; i < readCount; i++)
     {
@@ -480,18 +548,37 @@ int dip ()
     
     if (serialArray[1] > 0)
     { 
-      speed = speed + serialArray[1] - 10;
+      speed = speed + serialArray[1] - 128;
+      if (speed < 1)
+      {
+        speed = 1;
+      }
     }
     
     if (serialArray[2] > 0)
     {
-      groupSize = groupSize + serialArray[2] - 10;
+      groupSize = groupSize + serialArray[2] - 128;
       if (groupSize < 1)
       {
         groupSize = 1;
       }
       inverseGroupSize = 255/groupSize;
     }
+
+    if (serialArray[3] > 0)
+    {
+      benspeed = benspeed + (float(serialArray[3]) - 128)/ 100;
+      if (benspeed < 1.05)
+      {
+        benspeed = 1.05;
+      }
+    }
+
+	if (serialArray[4] > 0)
+	{
+		brightness = serialArray[4];
+	}
+
   }
   
   return (serialDip);
@@ -535,9 +622,13 @@ void steparray()
     Serial.print("\t");
     Serial.print(speed);
     Serial.print("\t");
+    Serial.print(groupSize);
+    Serial.print("\t");
     Serial.print(inverseGroupSize);
     Serial.print("\t");
-    Serial.println(groupSize);
+    Serial.print(benspeed);
+	Serial.print("\t");
+    Serial.println(loopHue);
     
     //DEBUG REMOVE ME
     
@@ -588,9 +679,44 @@ int doStrobe(){
   int specLevel= (analogRead(analogPin));
   digitalWrite(strobePin, HIGH);
   delayMicroseconds(100);
-  Serial.print (specLevel);
+//Serial.print (specLevel);
 
   return (specLevel);
+}
+
+void setHue(int hue, int localBrightness){
+	unsigned int hueRed = 0;
+	unsigned int hueGreen = 0;
+	unsigned int hueBlue = 0;
+
+	if (hue < 256){
+		hueRed = 255;
+		hueGreen = hue;
+	}
+	else if (hue < 512){
+		hueRed = 512-hue;
+		hueGreen = 255;
+	}
+	else if (hue < 768){
+		hueGreen = 255;
+		hueBlue = hue-512;
+	}
+	else if (hue < 1024){
+		hueGreen = 1024-hue;
+		hueBlue = 255;
+	}
+	else if (hue < 1280){
+		hueBlue = 255;
+		hueRed = hue-1024;
+	}
+	else if (hue < 1536){
+		hueBlue = 1536-hue;
+		hueRed = 255;
+	}
+	
+	leds[0].r = (hueRed * localBrightness) >> 8;
+	leds[0].g = (hueGreen * localBrightness) >> 8;
+	leds[0].b = (hueBlue * localBrightness) >> 8;	
 }
 
 
