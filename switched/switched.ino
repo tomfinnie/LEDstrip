@@ -1,6 +1,6 @@
 #include <FastSPI_LED.h>
 
-#define NUM_LEDS 30
+#define NUM_LEDS 156
 
 // Sometimes chipsets wire in a backwards sort of way
 struct CRGB { 
@@ -18,6 +18,8 @@ typedef struct
   double B;
 } 
 RgbFColor;
+
+typedef void (*FuncPtr)(void);
 
 #define PIN 7
 #define bri 50 
@@ -40,7 +42,7 @@ RgbFColor;
 unsigned long startPhase = 0;
 char jumpState = 0;
 
-int serialDip = 12;
+int serialDip = 15;
 int speed = 100;
 int groupSize = 5;
 int inverseGroupSize = 51;
@@ -49,7 +51,16 @@ int green = 0;
 int blue = 127;
 float benspeed = 1.3;
 int loopHue = 0;
-int brightness = 255;
+int brightness = 32;
+int globalColour = 0;
+int potValue0 = 0;
+int potValue1 = 0;
+int potValue2 = 0;
+int potValue3 = 0;
+int potValue4 = 0;
+
+FuncPtr jumpTable[] = {chaseStandby,chaseRainbowsOld,chaseFullbrite,chaseStrobe,chaseUserScroll,chaseBen,chaseRandom,chaseMSGEQ7_1,chaseMSGEQ7_2,chaseMSGEQ7_3,chaseMatrix,chaseRainbow,chaseBatterylevel,chaseMatrix,chaseFireIce1,chaseFireIce2};
+
 
 void setup()
 {
@@ -94,66 +105,64 @@ void setup()
 }
 
 void loop(){
-  int potValue0 = 0;
-  int potValue1 = 0;
-  int potValue2 = 0;
-  int potValue3 = 0;
-  int potValue4 = 0;
+	/*while (millis() < 10000){chaseRainbow();}
+	while (millis() < 20000){chaseBen();}*/
+
+	unsigned long octoSeconds = (millis() >> 13) % 16;
+
+	jumpTable[octoSeconds]();
+
+}
+
 
   // RGB PULSES WITH GAPS
-  while( dip() == 10 ){
+void chaseRGB(){ 
 	
 	//blank first LED. 3 for rgb.
-    memset(leds, 0, 3);
+	memset(leds, 0, 3);
 	
 	//should be rewritten with setHue (easy)
 
-    for(int j = -1; j < 8; j++ ){
-      for(int k = 0; k < (groupSize); k++){
-        if(dip() != 10){
-          break;
-        }
-        switch(j) {
-        case 3: 
-          leds[0].g = leds[0].g + inverseGroupSize; 
-          break;
-        case 1: 
-          leds[0].r = leds[0].r - inverseGroupSize; 
-          break;
-        case 6: 
-          leds[0].b = leds[0].b + inverseGroupSize; 
-          break;
-        case 4: 
-          leds[0].g = leds[0].g - inverseGroupSize; 
-          break;
-        case 0: 
-          leds[0].r = leds[0].r + inverseGroupSize; 
-          break;
-        case 7: 
-          leds[0].b = leds[0].b - inverseGroupSize; 
-          break;
-        case -1: 
-          break;
-        case 2: 
-          break;
-        case 5: 
-          break;
-          //case 8: break;
-        }
-        steparray ();
-        FastSPI_LED.show();
-        phaseDelay();
-      }
-    }
-  }
-  //delay(25);
-
+	for(int j = -1; j < 8; j++ ){
+		for(int k = 0; k < (groupSize); k++){
+			switch(j) {
+			case 3: 
+				leds[0].g = leds[0].g + inverseGroupSize; 
+				break;
+			case 1: 
+				leds[0].r = leds[0].r - inverseGroupSize; 
+				break;
+			case 6: 
+				leds[0].b = leds[0].b + inverseGroupSize; 
+				break;
+			case 4: 
+				leds[0].g = leds[0].g - inverseGroupSize; 
+				break;
+			case 0: 
+				leds[0].r = leds[0].r + inverseGroupSize; 
+				break;
+			case 7: 
+				leds[0].b = leds[0].b - inverseGroupSize; 
+				break;
+			case -1: 
+				break;
+			case 2: 
+				break;
+			case 5: 
+				break;
+			}
+			steparray ();
+			FastSPI_LED.show();
+			phaseDelay();
+		}
+	}
+}
 
   //RAINBOWS IN DA HOUSE
 
   //deprecated
 
-  while(dip() == 1 ){
+void chaseRainbowsOld(){
 
     //speed =  15;
 
@@ -161,9 +170,6 @@ void loop(){
     leds[0].r = 255;
 
     for(int j = 0; j < 6; j++ ){
-	  if(dip() != 1){
-         break;
-      }
       for(int k = 0; k < (groupSize); k++){
         switch(j) {
         case 0: 
@@ -198,7 +204,7 @@ void loop(){
   //problems with voltage drop if you run long strips without suplemental
   //power injection.
 
-  while( dip() == 2 ){
+  void chaseFullbrite(){
     potValue0 = analogRead(pot0)/4;
     potValue1 = analogRead(pot1)/4;
     for(int i = 0 ; i < NUM_LEDS; i++ ) {
@@ -207,56 +213,42 @@ void loop(){
       leds[i].b = brightness;
     }
     FastSPI_LED.show();
-    if(dip() != 2){
-      break;
-    }
     delay(50);
   }
 
   //STROBE
 
-  //Needs redoing for setHue()
   //Politics note; this will piss people off, a lot.
 
-  while( dip() == 3 ){
-    potValue0 = analogRead(pot0)/4;
-    potValue1 = analogRead(pot1)/4;
-    potValue2 = analogRead(pot2)/4;
-    potValue3 = analogRead(pot3)/4;
-    for(int i = 0 ; i < NUM_LEDS; i++ ) {
+void chaseStrobe(){
+	setHue (globalColour << 3, brightness);
+    for(int i = 1 ; i < NUM_LEDS; i++ ) {
       //fromHSV = RgbF_CreateFromHsv (0,1,1);
-      leds[i].r = potValue1 ;
-      leds[i].g = potValue2 ;
-      leds[i].b = potValue3 ;
+      leds[i].r = leds[0].r ;
+      leds[i].g = leds[0].g ;
+      leds[i].b = leds[0].b ;
       //leds[i] = RgbF_CreateFromHsv (potValue1,1,1);
     }
     FastSPI_LED.show();
-    if(dip() != 3){
-      break;
-    }
-    delay(potValue0);
+
+    delay(speed);
     memset(leds, 0, NUM_LEDS * 3);
     FastSPI_LED.show();
-    delay(potValue0);
+    delay(speed);
   }
 
   // USER COLOUR SCROLL
 
-  while( dip() == 4 ){
-    leds[0].r = analogRead(pot1)/4;
-    leds[0].g = analogRead(pot2)/4;
-    leds[0].b = analogRead(pot3)/4;
-    steparray ();
-    FastSPI_LED.show();
-    if(dip() != 4){
-      break;
-    }
-    phaseDelay();
-  }
+void chaseUserScroll(){
+	setHue (globalColour << 3, brightness);
+	steparray ();
+	FastSPI_LED.show();
+	phaseDelay();
+}
 
   //BENMODE
 
-  while( dip() == 5 ){
+void chaseBen(){
 
 
     //phaseDelay();
@@ -265,9 +257,6 @@ void loop(){
       leds[0].r = 255;
       //FastSPI_LED.show();
       steparray ();
-      if(dip() != 5){
-        break;
-      }
       //phaseDelay();
     }
 
@@ -283,9 +272,6 @@ void loop(){
 
       //FastSPI_LED.show();
       steparray ();
-      if(dip() != 5){
-        break;
-      }
       //phaseDelay();
     }
 
@@ -294,16 +280,13 @@ void loop(){
 	for(int j = 0; j < (groupSize); j++){
       //FastSPI_LED.show();
       steparray ();
-      if(dip() != 5){
-        break;
-      }
       //phaseDelay();
     }
   }
 
   //RANDOMIZER
 
-  while( dip() == 6 ){
+void chaseRandom(){
 
 	loopHue += random(2*groupSize) - groupSize;
 	loopHue = abs(loopHue) % 1536 ;
@@ -313,7 +296,7 @@ void loop(){
 
   //MSGEQ7 DRIVEN 1
 
-  while( dip() == 7 )
+void chaseMSGEQ7_1()
   {
 
     for (int i = 0; i < 10; i++)
@@ -331,16 +314,13 @@ void loop(){
     leds[0].b = doStrobe()/4;
 
     steparray ();
-    if(dip() != 7){
-      break;
-    }
 
   }
 
 
   //MSGEQ7 DRIVEN 2 
 
-  while( dip() == 8 ){
+void chaseMSGEQ7_2(){
 
     memset(leds, 0, NUM_LEDS * 3);
 
@@ -380,15 +360,12 @@ void loop(){
 
     FastSPI_LED.show();
 
-    if(dip() != 8){
-      break;
-    }
 
   }
 
   //MSGEQ7 DRIVEN 3 
 
-  while( dip() == 9 )
+void chaseMSGEQ7_3()
   {
 
     memset(leds, 0, NUM_LEDS * 3);
@@ -431,16 +408,12 @@ void loop(){
 
     FastSPI_LED.show();
 
-    if(dip() != 9)
-    {
-      break;
-    }
 
   }
 
   //MATRIX
 
-  while( dip() == 10 ){
+void chaseMatrix(){
     
 	setHue (random(0,1535),255);
 
@@ -452,9 +425,7 @@ void loop(){
 	  leds[0].b = leds[0].b / benspeed;
 
       steparray ();
-      if(dip() != 10){
-        break;
-      }
+
       //phaseDelay();
     }
 
@@ -463,16 +434,13 @@ void loop(){
 	for(int j = 0; j < (groupSize); j++){
       //FastSPI_LED.show();
       steparray ();
-      if(dip() != 10){
-        break;
-      }
       //phaseDelay();
     }
   }
 	 
   //NEW RAINBOW
 
-  while (dip() == 11)
+void chaseRainbow()
   {
 	  for(int i = 0; i < 1535; i+= inverseGroupSize)
 	  {
@@ -486,10 +454,17 @@ void loop(){
 //http://www.candlepowerforums.com/vb/showthread.php?81044-Li-Ion-remaining-capacity-vs-voltage
 //relies on exact 5v supply for any semblance of accuracy
 
-  while (dip() == 12)
+void chaseBatterylevel()
   {
 	  memset(leds, 0, NUM_LEDS * 3);
-	  int batteryRaw = analogRead(batteryMonitor);
+	  
+	  int batteryRaw = 0;
+	  for (int i = 0; i < 16; i++){
+		batteryRaw += analogRead(batteryMonitor);
+		delay(10);
+	  }
+	  batteryRaw = batteryRaw >> 4;
+
 	  int batteryPercentage = 0;
 
 	  if (batteryRaw > 860) // = 4.2/5 * 1024
@@ -509,24 +484,46 @@ void loop(){
 	  FastSPI_LED.show();
 	  Serial.print("Battery level is ");
 	  Serial.println(batteryPercentage);
-	  delay(1000);
+	  delay(100);
 
   }
 
+  //FIRE & ICE 1
 
+void chaseFireIce1 ()
+  {
+	setHue(random(0,256),brightness);
+	leds[NUM_LEDS/2].r = 0;
+	leds[NUM_LEDS/2].g = 0;
+	leds[NUM_LEDS/2].b = random (0,brightness);
+	steparray();
 
+  }
+
+  //FIRE & ICE 2
+
+  
+void chaseFireIce2 ()
+  {
+
+	for(int i = 0; i < 512; i+= inverseGroupSize)
+	{
+		setHue(abs(256-i),brightness);
+		leds[NUM_LEDS/2].r = 0;
+		leds[NUM_LEDS/2].g = 0;
+		leds[NUM_LEDS/2].b = (i * brightness) >> 9;
+		steparray();
+	}
+  }
 
   //STANDING BY....
-  while( dip() > 13 )
+void chaseStandby ()
   {
     for(int i = 0 ; i < NUM_LEDS; i++ ) 
     {
       memset(leds, 0, NUM_LEDS * 3);
       leds[i].g = 255;
       FastSPI_LED.show();
-      if(dip() <= 6){
-        break;
-      }
       Serial.print(analogRead(pot0));
       Serial.print("\t");
       Serial.print(analogRead(pot1));
@@ -540,7 +537,7 @@ void loop(){
       delay(250);
     }
   }
-}
+
 
 int dip ()
 {
@@ -549,7 +546,7 @@ int dip ()
   byte readCount = Serial.available();
   int serialArray[readCount+1];
 
-  if (readCount > 4) 
+  if (readCount > 5) 
   {  
     for (int i = 0; i < readCount; i++)
     {
@@ -565,30 +562,19 @@ int dip ()
 
     if (serialArray[1] > 0)
     { 
-      speed = speed + serialArray[1] - 128;
-      if (speed < 1)
-      {
-        speed = 1;
-      }
+      speed = serialArray[1];
     }
     
     if (serialArray[2] > 0)
     {
-      groupSize = groupSize + serialArray[2] - 128;
-      if (groupSize < 1)
-      {
-        groupSize = 1;
-      }
+      groupSize = serialArray[2];
       inverseGroupSize = 255/groupSize;
     }
 
-    if (serialArray[3] > 0)
+    if (serialArray[3] > 6) //Don't allow very low decay values
     {
-      benspeed = benspeed + (float(serialArray[3]) - 128)/ 100;
-      if (benspeed < 1.05)
-      {
-        benspeed = 1.05;
-      }
+      benspeed = 1 + serialArray[3] >> 7;
+      
     }
 
 	if (serialArray[4] > 0)
@@ -596,8 +582,13 @@ int dip ()
 		brightness = serialArray[4];
 	}
 
+	if (serialArray[5] > 0)
+	{
+		globalColour = serialArray[5];
+	}
+
   }
-  
+  serialDebug();
   return (serialDip);
 }
 
@@ -635,22 +626,6 @@ void steparray()
 
     startPhase = millis();
     jumpState = 0;
-    
-    //DEBUG REMOVE ME
-    
-    Serial.print(serialDip);
-    Serial.print("\t");
-    Serial.print(speed);
-    Serial.print("\t");
-    Serial.print(groupSize);
-    Serial.print("\t");
-    Serial.print(inverseGroupSize);
-    Serial.print("\t");
-    Serial.print(benspeed);
-	Serial.print("\t");
-    Serial.println(loopHue);
-    
-    //DEBUG REMOVE ME
     
   } 
   else {
@@ -733,10 +708,31 @@ void setHue(int hue, int localBrightness){
 		hueBlue = 1536-hue;
 		hueRed = 255;
 	}
+	else{
+		hueRed = 255;
+		hueGreen = 255;
+		hueBlue = 255;
+	}
 	
 	leds[0].r = (hueRed * localBrightness) >> 8;
 	leds[0].g = (hueGreen * localBrightness) >> 8;
 	leds[0].b = (hueBlue * localBrightness) >> 8;	
+}
+
+void serialDebug(){
+	Serial.print(serialDip);
+    Serial.print("\t");
+    Serial.print(speed);
+    Serial.print("\t");
+    Serial.print(groupSize);
+    Serial.print("\t");
+    Serial.print(inverseGroupSize);
+    Serial.print("\t");
+    Serial.print(benspeed);
+	Serial.print("\t");
+    Serial.print(loopHue);
+	Serial.print("\t");
+    Serial.println(globalColour);
 }
 
 
