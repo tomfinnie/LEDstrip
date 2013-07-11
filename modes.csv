@@ -1,5 +1,5 @@
 index,mode,,serial byte,Pupose
-0,,,0,Mode
+0,standby,,0,Mode
 1,old rainbows,,1,speed
 2,fullbrite,,2,groupsize
 3,strobe,,3,benspeed

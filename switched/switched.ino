@@ -42,17 +42,18 @@ typedef void (*FuncPtr)(void);
 unsigned long startPhase = 0;
 char jumpState = 0;
 
-int serialDip = 15;
-int speed = 100;
-int groupSize = 5;
+byte serialDip = 15;
+byte speed = 100;
+byte groupSize = 5;
+float benspeed = 1.3;
+byte brightness = 32;
+byte globalColour = 0;
+
 int inverseGroupSize = 51;
 int red = 0;
 int green = 0;
 int blue = 127;
-float benspeed = 1.3;
 int loopHue = 0;
-int brightness = 32;
-int globalColour = 0;
 int potValue0 = 0;
 int potValue1 = 0;
 int potValue2 = 0;
@@ -97,7 +98,7 @@ void setup()
   digitalWrite(strobePin, HIGH);
 
 
-  Serial.begin(9600);
+  Serial.begin(9600, SERIAL_8N1);
   // pinMode(aButton, INPUT);
   // pinMode(bButton, INPUT);
   // pinMode(cButton, INPUT);
@@ -108,9 +109,9 @@ void loop(){
 	/*while (millis() < 10000){chaseRainbow();}
 	while (millis() < 20000){chaseBen();}*/
 
-	unsigned long octoSeconds = (millis() >> 13) % 16;
+	//unsigned long octoSeconds = (millis() >> 13) % 16;
 
-	jumpTable[octoSeconds]();
+	jumpTable[dip()]();
 
 }
 
@@ -543,22 +544,19 @@ int dip ()
 {
   //return (digitalRead(aButton)+digitalRead(bButton)*2+digitalRead(cButton)*4+digitalRead(dButton)*8);
   //return(1);
-  byte readCount = Serial.available();
-  int serialArray[readCount+1];
+	
+  int readCount = Serial.available();
+  byte serialArray[readCount];
 
-  if (readCount > 5) 
+
+  if (readCount == 6) 
   {  
-    for (int i = 0; i < readCount; i++)
-    {
-      serialArray[i] = Serial.read();
-    }
+	Serial.readBytes((char *) serialArray,readCount);
     if (serialArray[0] > 0)
     {
       serialDip = serialArray[0];
     }
     
-	//bytes 1..3 need to be rewritten to be absolute rather than relative, not sure
-	//why I thought that was a good idea
 
     if (serialArray[1] > 0)
     { 
@@ -573,7 +571,7 @@ int dip ()
 
     if (serialArray[3] > 6) //Don't allow very low decay values
     {
-      benspeed = 1 + serialArray[3] >> 7;
+      benspeed = 1 + (serialArray[3] >> 7);
       
     }
 
@@ -588,6 +586,7 @@ int dip ()
 	}
 
   }
+
   serialDebug();
   return (serialDip);
 }
@@ -720,20 +719,32 @@ void setHue(int hue, int localBrightness){
 }
 
 void serialDebug(){
-	Serial.print(serialDip);
+	Serial.print(serialDip,HEX);
     Serial.print("\t");
-    Serial.print(speed);
+    Serial.print(speed,HEX);
     Serial.print("\t");
-    Serial.print(groupSize);
-    Serial.print("\t");
-    Serial.print(inverseGroupSize);
+    Serial.print(groupSize,HEX);
     Serial.print("\t");
     Serial.print(benspeed);
 	Serial.print("\t");
-    Serial.print(loopHue);
+    Serial.print(brightness,HEX);
 	Serial.print("\t");
-    Serial.println(globalColour);
+    Serial.print(globalColour,HEX);
+	Serial.print("\t");
+	Serial.print("\t");
+    Serial.println(Serial.available());
 }
+
+
+/*void serialDebug(){
+	Serial.write(serialDip);
+    Serial.write(speed); 
+    Serial.write(groupSize);   
+	char benspeedchar = ((benspeed - 1) * 128);
+    Serial.write(benspeedchar);	
+    Serial.write(brightness);
+    Serial.write(globalColour);
+}*/
 
 
 
