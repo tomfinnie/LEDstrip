@@ -1,4 +1,5 @@
 #include <FastSPI_LED.h>
+#include <math.h>
 
 #define NUM_LEDS 156
 
@@ -42,12 +43,13 @@ typedef void (*FuncPtr)(void);
 unsigned long startPhase = 0;
 char jumpState = 0;
 
-byte serialDip = 15;
+byte serialDip = 16;
 byte speed = 100;
 byte groupSize = 5;
 float benspeed = 1.3;
 byte brightness = 32;
 byte globalColour = 0;
+byte serialTimeout =0;
 
 int inverseGroupSize = 51;
 int red = 0;
@@ -60,7 +62,7 @@ int potValue2 = 0;
 int potValue3 = 0;
 int potValue4 = 0;
 
-FuncPtr jumpTable[] = {chaseStandby,chaseRainbowsOld,chaseFullbrite,chaseStrobe,chaseUserScroll,chaseBen,chaseRandom,chaseMSGEQ7_1,chaseMSGEQ7_2,chaseMSGEQ7_3,chaseMatrix,chaseRainbow,chaseBatterylevel,chaseMatrix,chaseFireIce1,chaseFireIce2};
+FuncPtr jumpTable[] = {chaseStandby,chaseRainbowsOld,chaseFullbrite,chaseStrobe,chaseUserScroll,chaseBen,chaseRandom,chaseMSGEQ7_1,chaseMSGEQ7_2,chaseMSGEQ7_3,chaseMatrix,chaseRainbow,chaseBatterylevel,chaseMatrix,chaseFireIce1,chaseFireIce2,chaseTemp};
 
 
 void setup()
@@ -73,7 +75,7 @@ void setup()
   //FastSPI_LED.setChipset(CFastSPI_LED::SPI_595);
   //FastSPI_LED.setChipset(CFastSPI_LED::SPI_WS2801);
 
-  FastSPI_LED.setPin(PIN);
+  FastSPI_LED.setPin(PIN)
 
   FastSPI_LED.init();
   FastSPI_LED.start();
@@ -539,6 +541,14 @@ void chaseStandby ()
     }
   }
 
+void chaseTemp ()
+{
+	long temp= readTemp()/10000;
+	Serial.println(temp,DEC);
+	setTemp((temp-22)*5,(temp-22)*5);
+	steparray();
+	delay(2000);
+}
 
 int dip ()
 {
@@ -584,8 +594,22 @@ int dip ()
 	{
 		globalColour = serialArray[5];
 	}
-
+	serialTimeout = 0;
   }
+  else if (readCount > 6)
+  {
+	  Serial.readBytes((char *) serialArray,readCount);
+  }
+	  else if (serialTimeout > 2)
+	  {
+		  Serial.readBytes((char *) serialArray,readCount);
+		  serialTimeout = 0;
+	  }
+	  else
+	  {
+		  serialTimeout++;
+	  }
+
 
   serialDebug();
   return (serialDip);
@@ -719,7 +743,7 @@ void setHue(int hue, int localBrightness){
 }
 
 void serialDebug(){
-	Serial.print(serialDip,HEX);
+	/*Serial.print(serialDip,HEX);
     Serial.print("\t");
     Serial.print(speed,HEX);
     Serial.print("\t");
@@ -732,7 +756,7 @@ void serialDebug(){
     Serial.print(globalColour,HEX);
 	Serial.print("\t");
 	Serial.print("\t");
-    Serial.println(Serial.available());
+    Serial.println(Serial.available());*/
 }
 
 
@@ -746,5 +770,59 @@ void serialDebug(){
     Serial.write(globalColour);
 }*/
 
+//temperature in centigrade * 100
+
+void setTemp(int temperature, int localBrightness){
+
+	if (temperature <= 66) {red = 255;}
+    else
+	{
+        red = temperature - 60;
+        red = 329.698727446 * pow(red,-0.133204);
+		if (red < 0) { red = 0;}
+		if (red > 255) { red = 255;}
+	}
+
+    if (temperature <= 66) 
+	{
+        green = temperature;
+        green = 99.4708025861 * log(green) - 161.1195681661;
+		if (green < 0 ){ green = 0;}
+		if (green > 255) { green = 255;}
+	}
+    else
+	{
+        green = temperature - 60;
+        green = 288.1221695283 * pow(green,-0.0755148492);
+		if (green < 0) { green = 0;}
+		if (green > 255) { green = 255;}
+	}
+
+	if (temperature >= 66) {blue = 255;}
+	else if (temperature <= 19) {blue = 0;}
+    else
+	{
+		blue = temperature - 10;
+		blue = 138.5177312231 * log(blue) - 305.0447927307;
+		if (blue < 0) { blue = 0;}
+		if (blue > 255) { blue = 255;}
+	}
+	leds[0].r = (red * localBrightness) >> 8;
+	leds[0].g = (green * localBrightness) >> 8;
+	leds[0].b = (blue * localBrightness) >> 8;	
+}
+
+long readTemp() {
+  long result;
+  // Read temperature sensor against 1.1V reference
+  ADMUX = _BV(REFS1) | _BV(REFS0) | _BV(MUX3);
+  delay(2); // Wait for Vref to settle
+  ADCSRA |= _BV(ADSC); // Convert
+  while (bit_is_set(ADCSRA,ADSC));
+  result = ADCL;
+  result |= ADCH<<8;
+  result = (result - 125) * 1075;
+  return result;
+}
 
 
