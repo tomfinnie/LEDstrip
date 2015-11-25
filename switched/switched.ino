@@ -383,7 +383,7 @@ void chaseStandby ()
 
 void chaseTemp ()
 {
-	long temp= readTemp()/10000;
+	long temp = readTemp()/10000;
 	Serial.println(temp,DEC);
 	setTemp((temp-22)*5,(temp-22)*5);
 	steparray();
@@ -444,7 +444,6 @@ int dip ()
 	{
 		serialTimeout++;
 	}
-
 
 	serialDebug();
 	return (serialDip);
