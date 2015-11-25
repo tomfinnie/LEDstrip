@@ -43,7 +43,7 @@ typedef void (*FuncPtr)(void);
 unsigned long startPhase = 0;
 char jumpState = 0;
 
-byte serialDip = 10;
+byte serialDip = 12;  // battery
 byte speed = 20;
 byte groupSize = 5;
 float benspeed = 1.3;
@@ -295,17 +295,8 @@ void chaseRainbow()
 //http://www.candlepowerforums.com/vb/showthread.php?81044-Li-Ion-remaining-capacity-vs-voltage
 //relies on exact 5v supply for any semblance of accuracy
 
-void chaseBatterylevel()
+int calcBatteryPercentage(int batteryRaw)
 {
-	memset(leds, 0, NUM_LEDS * 3);
-
-	int batteryRaw = 0;
-	for (int i = 0; i < 16; i++){
-		batteryRaw += analogRead(batteryMonitor);
-		delay(10);
-	}
-	batteryRaw = batteryRaw >> 4;
-
 	int batteryPercentage = 0;
 
 	if (batteryRaw > 860) // = 4.2/5 * 1024
@@ -321,6 +312,23 @@ void chaseBatterylevel()
 		batteryPercentage = batteryRaw - 739;
 	}
 
+	return batteryPercentage;
+}
+
+void chaseBatterylevel()
+{
+	memset(leds, 0, NUM_LEDS * 3);
+
+	int batteryRaw = 0;
+	for (int i = 0; i < 16; i++){
+		batteryRaw += analogRead(batteryMonitor);
+		delay(10);
+	}
+	batteryRaw = batteryRaw >> 4;
+	batteryRaw = 747;  // FIXME: this is for demo purposes only
+
+	int batteryPercentage = calcBatteryPercentage(batteryRaw);
+
 	for(int i = 0 ; i < (NUM_LEDS*batteryPercentage)/100 ; i++ )
 	{
 		leds[i].r = 50;
@@ -330,7 +338,6 @@ void chaseBatterylevel()
 	Serial.print("Battery level is ");
 	Serial.println(batteryPercentage);
 	delay(100);
-
 }
 
 //FIRE & ICE 1
@@ -622,23 +629,23 @@ long readTemp() {
 
 FuncPtr jumpTable[] =
 {
-	chaseStandby,
-	chaseRainbowsOld,
-	chaseFullbrite,
-	chaseStrobe,
-	chaseUserScroll,
-	chaseBen,
-	chaseRandom,
+	chaseStandby,			// 0
+	chaseRainbowsOld,		// 1
+	chaseFullbrite,			// 2
+	chaseStrobe,			// 3
+	chaseUserScroll,		// 4
+	chaseBen,				// 5
+	chaseRandom,			// 6
 	NULL,
 	NULL,
 	NULL,
-	chaseMatrix,
-	chaseRainbow,
-	chaseBatterylevel,
-	chaseMatrix,
-	chaseFireIce1,
-	chaseFireIce2,
-	chaseTemp
+	chaseMatrix,			// 10
+	chaseRainbow,			// 11
+	chaseBatterylevel,		// 12
+	chaseMatrix,			// 13
+	chaseFireIce1,			// 14
+	chaseFireIce2,			// 15
+	chaseTemp				// 16
 };
 
 void loop()

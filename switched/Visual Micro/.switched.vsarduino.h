@@ -34,6 +34,7 @@ void chaseBen();
 void chaseRandom();
 void chaseMatrix();
 void chaseRainbow();
+int calcBatteryPercentage(int batteryRaw);
 void chaseBatterylevel();
 void chaseFireIce1 ();
 void chaseFireIce2 ();
