@@ -458,52 +458,40 @@ void steparray()
 	int targetDelay = speed;
 	int jumps=1;
 
-	if(true)  // FIXME
+	for(int i = (NUM_LEDS-1); i > jumps-1 ; i --)
 	{
-
-		for(int i = (NUM_LEDS-1); i > jumps-1 ; i --)
-		{
-			leds[i].r=leds[i-jumps].r;
-			leds[i].g=leds[i-jumps].g;
-			leds[i].b=leds[i-jumps].b;
-		}
-
-		FastSPI_LED.show();
-		if (millis() >= targetDelay+startPhase)
-		{
-			digitalWrite(13, HIGH);
-		}
-
-		while (millis() < targetDelay+startPhase)
-		{
-			digitalWrite(13, LOW);
-			delayMicroseconds(100);
-		}
-
-		startPhase = millis();
-		jumpState = 0;
-
-	} 
-	else {
-		for(int i = (jumps-1); i > 0 ; i --){
-			leds[i].r=leds[i-1].r;
-			leds[i].g=leds[i-1].g;
-			leds[i].b=leds[i-1].b;
-		}
+		leds[i].r=leds[i-jumps].r;
+		leds[i].g=leds[i-jumps].g;
+		leds[i].b=leds[i-jumps].b;
 	}
+
+	FastSPI_LED.show();
+	if (millis() >= targetDelay+startPhase)
+	{
+		digitalWrite(13, HIGH);
+	}
+
+	while (millis() < targetDelay+startPhase)
+	{
+		digitalWrite(13, LOW);
+		delayMicroseconds(100);
+	}
+
+	startPhase = millis();
+	jumpState = 0;
 }
 
 
 int doStrobe(){
 	digitalWrite(strobePin, LOW);
 	delayMicroseconds(100); // to allow the output to settle
-	int specLevel= (analogRead(analogPin));
+	int specLevel = (analogRead(analogPin));
 	digitalWrite(strobePin, HIGH);
 	delayMicroseconds(100);
 	return (specLevel);
 }
 
-void setHue(int hue, int localBrightness){
+void setHue(int hue, int localBrightness) {
 	unsigned int hueRed = 0;
 	unsigned int hueGreen = 0;
 	unsigned int hueBlue = 0;
