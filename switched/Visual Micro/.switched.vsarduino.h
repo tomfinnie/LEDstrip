@@ -25,7 +25,6 @@ typedef unsigned char byte;
 extern "C" void __cxa_pure_virtual() {}
 
 //already defined in arduno.h
-//already defined in arduno.h
 void chaseRGB();
 void chaseRainbowsOld();
 void chaseFullbrite();
@@ -33,9 +32,6 @@ void chaseStrobe();
 void chaseUserScroll();
 void chaseBen();
 void chaseRandom();
-void chaseMSGEQ7_1();
-void chaseMSGEQ7_2();
-void chaseMSGEQ7_3();
 void chaseMatrix();
 void chaseRainbow();
 void chaseBatterylevel();
@@ -45,12 +41,12 @@ void chaseStandby ();
 void chaseTemp ();
 int dip ();
 void steparray();
-void phaseDelay();
 int doStrobe();
 void setHue(int hue, int localBrightness);
 void serialDebug();
 void setTemp(int temperature, int localBrightness);
 long readTemp();
+//already defined in arduno.h
 
 #include "C:\Program Files (x86)\arduino-1.0.3\hardware\arduino\variants\standard\pins_arduino.h" 
 #include "C:\Program Files (x86)\arduino-1.0.3\hardware\arduino\cores\arduino\arduino.h"
