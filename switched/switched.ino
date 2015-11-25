@@ -1,6 +1,6 @@
 #include <FastSPI_LED.h>
 #include <math.h>
-H
+
 #define NUM_LEDS 400
 
 // Sometimes chipsets wire in a backwards sort of way
@@ -62,7 +62,6 @@ int potValue2 = 0;
 int potValue3 = 0;
 int potValue4 = 0;
 
-FuncPtr jumpTable[] = {chaseStandby,chaseRainbowsOld,chaseFullbrite,chaseStrobe,chaseUserScroll,chaseBen,chaseRandom,chaseMSGEQ7_1,chaseMSGEQ7_2,chaseMSGEQ7_3,chaseMatrix,chaseRainbow,chaseBatterylevel,chaseMatrix,chaseFireIce1,chaseFireIce2,chaseTemp};
 
 
 void setup()
@@ -107,15 +106,7 @@ void setup()
   // pinMode(dButton, INPUT);
 }
 
-void loop(){
-	/*while (millis() < 10000){chaseRainbow();}
-	while (millis() < 20000){chaseBen();}*/
 
-	//unsigned long octoSeconds = (millis() >> 13) % 16;
-
-	jumpTable[dip()]();
-
-}
 
 
   // RGB PULSES WITH GAPS
@@ -825,4 +816,16 @@ long readTemp() {
   return result;
 }
 
+FuncPtr jumpTable[] = {chaseStandby,chaseRainbowsOld,chaseFullbrite,chaseStrobe,chaseUserScroll,chaseBen,chaseRandom,chaseMSGEQ7_1,chaseMSGEQ7_2,chaseMSGEQ7_3,chaseMatrix,chaseRainbow,chaseBatterylevel,chaseMatrix,chaseFireIce1,chaseFireIce2,chaseTemp};
+
+
+void loop(){
+  /*while (millis() < 10000){chaseRainbow();}
+  while (millis() < 20000){chaseBen();}*/
+
+  //unsigned long octoSeconds = (millis() >> 13) % 16;
+
+  jumpTable[dip()]();
+
+}
 
