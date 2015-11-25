@@ -1,0 +1,8 @@
+<VisualMicro>
+  <Program Name="switched" Ext=".ino" Location="C:\Users\tom\SkyDrive\github\LEDstrip\switched">
+    <Compile IsCompiled="0" CompilerErrors="0" ConfigurationName="Debug" StopOnError="False" OptimiseLibs="True" OptimiseCore="True" BuildPath="C:\Users\tom\AppData\Local\VMicro\Arduino\Builds\switched\uno" />
+    <Platform Name="Arduino">
+      <Board Name="uno" Description="Arduino Uno" CoreFolder="C:\Program Files (x86)\arduino-1.0.3\hardware\arduino\cores\arduino" VariantFullPath="C:\Program Files (x86)\arduino-1.0.3\hardware\arduino\variants\standard" bootloader.extended_fuses="0x05" bootloader.file="optiboot_atmega328.hex" bootloader.high_fuses="0xde" bootloader.lock_bits="0x0F" bootloader.low_fuses="0xff" bootloader.path="optiboot" bootloader.unlock_bits="0x3F" build.core="arduino" build.f_cpu="16000000L" build.mcu="atmega328p" build.variant="standard" build.variant.vmresolved="C:\Program Files (x86)\arduino-1.0.3\hardware\arduino\variants\standard" name="Arduino Uno" upload.maximum_size="32256" upload.protocol="arduino" upload.speed="115200" />
+    </Platform>
+  </Program>
+</VisualMicro>

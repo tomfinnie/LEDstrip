@@ -1,7 +1,7 @@
 #include <FastSPI_LED.h>
 #include <math.h>
-
-#define NUM_LEDS 156
+H
+#define NUM_LEDS 400
 
 // Sometimes chipsets wire in a backwards sort of way
 struct CRGB { 
@@ -43,8 +43,8 @@ typedef void (*FuncPtr)(void);
 unsigned long startPhase = 0;
 char jumpState = 0;
 
-byte serialDip = 16;
-byte speed = 100;
+byte serialDip = 10;
+byte speed = 20;
 byte groupSize = 5;
 float benspeed = 1.3;
 byte brightness = 32;
@@ -75,7 +75,7 @@ void setup()
   //FastSPI_LED.setChipset(CFastSPI_LED::SPI_595);
   //FastSPI_LED.setChipset(CFastSPI_LED::SPI_WS2801);
 
-  FastSPI_LED.setPin(PIN)
+  FastSPI_LED.setPin(PIN);
 
   FastSPI_LED.init();
   FastSPI_LED.start();
@@ -257,15 +257,15 @@ void chaseBen(){
     //phaseDelay();
 
     for(int j = 0; j < 3; j++ ){   //head
-      leds[0].r = 255;
+      leds[0].r = brightness;
       //FastSPI_LED.show();
       steparray ();
       //phaseDelay();
     }
 
-    leds[0].r = 255;
-    leds[0].g = 255;
-    leds[0].b = 255 / benspeed;
+    leds[0].r = brightness;
+    leds[0].g = brightness;
+    leds[0].b = brightness / benspeed;
 
     while(leds[0].r > 1){
 
@@ -418,7 +418,7 @@ void chaseMSGEQ7_3()
 
 void chaseMatrix(){
     
-	setHue (random(0,1535),255);
+	setHue (random(0,1535),brightness);
 
 
     while((leds[0].r + leds[0].g +leds[0].b) > 1){

@@ -1,0 +1,14 @@
+<VisualMicro>
+  <Program Name="switched" Ext=".ino" Location="C:\Users\tom\SkyDrive\github\LEDstrip\switched">
+    <Compile CompilerErrors="0" ConfigurationName="Debug" StopOnError="False" OptimiseLibs="True" OptimiseCore="True" BuildPath="C:\Users\tom\AppData\Local\VMicro\Arduino\Builds\switched\uno" IncludeDebug="0" IncludesDebug="0" SketchName="switched" IsCompiled="1" />
+    <Platform Name="Arduino">
+      <Board Name="uno" Description="Arduino Uno" CoreFolder="C:\Program Files (x86)\arduino-1.0.2\hardware\arduino\cores\arduino" VariantFullPath="C:\Program Files (x86)\arduino-1.0.2\hardware\arduino\variants\standard" />
+    </Platform>
+    <VCCodeModel>
+      <VCCodeMacros>
+        <VCCodeMacro Name="ARDUINO" Value="102" />
+        <VCCodeMacro Name="__AVR_ATmega328P__" />
+      </VCCodeMacros>
+    </VCCodeModel>
+  </Program>
+</VisualMicro>
