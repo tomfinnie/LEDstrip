@@ -34,7 +34,6 @@ void chaseBen();
 void chaseRandom();
 void chaseMatrix();
 void chaseRainbow();
-int calcBatteryPercentage(int batteryRaw);
 void chaseBatterylevel();
 void chaseFireIce1 ();
 void chaseFireIce2 ();
@@ -52,3 +51,5 @@ long readTemp();
 #include "C:\Program Files (x86)\arduino-1.0.3\hardware\arduino\variants\standard\pins_arduino.h" 
 #include "C:\Program Files (x86)\arduino-1.0.3\hardware\arduino\cores\arduino\arduino.h"
 #include "C:\Users\tom\SkyDrive\github\LEDstrip\switched\switched.ino"
+#include "C:\Users\tom\SkyDrive\github\LEDstrip\switched\ledlib.c"
+#include "C:\Users\tom\SkyDrive\github\LEDstrip\switched\ledlib.h"
