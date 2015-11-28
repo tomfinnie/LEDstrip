@@ -2,7 +2,8 @@
 #include <FastSPI_LED.h>
 #include "ledlib.c"
 
-#define NUM_LEDS 400
+#define NUM_LEDS 359
+#define DEBUG 1
 
 // Sometimes chipsets wire in a backwards sort of way
 struct CRGB { 
@@ -44,7 +45,7 @@ typedef void (*FuncPtr)(void);
 unsigned long startPhase = 0;
 char jumpState = 0;
 
-byte serialDip = 12;  // battery
+byte serialDip = 11;  // rainbow
 byte speed = 20;
 byte groupSize = 5;
 float benspeed = 1.3;
@@ -104,7 +105,7 @@ void chaseRGB(){
 
 	//blank first LED. 3 for rgb.
 	memset(leds, 0, 3);
-
+	//fixme
 	//should be rewritten with setHue (easy)
 
 	for(int j = -1; j < 8; j++ ){
@@ -381,7 +382,7 @@ int dip ()
 
 	if (readCount == 6) 
 	{  
-		Serial.readBytes((char *) serialArray,readCount);
+		Serial.readBytes((char *) serialArray, readCount);
 		if (serialArray[0] > 0)
 		{
 			serialDip = serialArray[0];
@@ -514,8 +515,10 @@ void setHue(int hue, int localBrightness) {
 	leds[0].b = (hueBlue * localBrightness) >> 8;	
 }
 
-void serialDebug(){
-	/*Serial.print(serialDip,HEX);
+void serialDebug()
+{
+#ifdef DEBUG
+	Serial.print(serialDip,HEX);
 	Serial.print("\t");
 	Serial.print(speed,HEX);
 	Serial.print("\t");
@@ -528,19 +531,10 @@ void serialDebug(){
 	Serial.print(globalColour,HEX);
 	Serial.print("\t");
 	Serial.print("\t");
-	Serial.println(Serial.available());*/
+	Serial.println(Serial.available());
+#endif
 }
 
-
-/*void serialDebug(){
-Serial.write(serialDip);
-Serial.write(speed); 
-Serial.write(groupSize);   
-char benspeedchar = ((benspeed - 1) * 128);
-Serial.write(benspeedchar);	
-Serial.write(brightness);
-Serial.write(globalColour);
-}*/
 
 //temperature in centigrade * 100
 void setTemp(int temperature, int localBrightness){
@@ -613,7 +607,7 @@ FuncPtr jumpTable[] =
 	chaseUserScroll,		// 4
 	chaseBen,				// 5
 	chaseRandom,			// 6
-	NULL,
+	chaseRGB,				// 7
 	NULL,
 	NULL,
 	chaseMatrix,			// 10
