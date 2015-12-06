@@ -1,3 +1,5 @@
+#include "ledlib.h"
+
 // LEDlib implementation
 
 //BATTERY LEVEL
@@ -22,4 +24,9 @@ int calcBatteryPercentage(int batteryRaw)
 	}
 
 	return batteryPercentage;
+}
+
+void dispatchMode(byte mode, FuncPtr jumpTable[])
+{
+	jumpTable[mode]();
 }

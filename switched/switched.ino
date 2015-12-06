@@ -3,7 +3,14 @@
 #include "ledlib.c"
 
 #define NUM_LEDS 359
-#define DEBUG 1
+//#define DEBUG 
+
+#ifdef DEBUG 
+	#define SERIAL_DEBUG() serialDebug()
+#else
+	#define SERIAL_DEBUG() 
+#endif
+
 
 // Sometimes chipsets wire in a backwards sort of way
 struct CRGB { 
@@ -49,7 +56,7 @@ byte serialDip = 11;  // rainbow
 byte speed = 20;
 byte groupSize = 5;
 float benspeed = 1.3;
-byte brightness = 32;
+byte brightness = 4;
 byte globalColour = 0;
 byte serialTimeout =0;
 
@@ -430,7 +437,7 @@ int dip ()
 		serialTimeout++;
 	}
 
-	serialDebug();
+	SERIAL_DEBUG();
 	return (serialDip);
 }
 
@@ -517,7 +524,6 @@ void setHue(int hue, int localBrightness) {
 
 void serialDebug()
 {
-#ifdef DEBUG
 	Serial.print(serialDip,HEX);
 	Serial.print("\t");
 	Serial.print(speed,HEX);
@@ -532,7 +538,6 @@ void serialDebug()
 	Serial.print("\t");
 	Serial.print("\t");
 	Serial.println(Serial.available());
-#endif
 }
 
 
