@@ -11,7 +11,7 @@
 	#define SERIAL_DEBUG() 
 #endif
 
-
+ 
 // Sometimes chipsets wire in a backwards sort of way
 struct CRGB { 
 	unsigned char g; 
@@ -56,7 +56,7 @@ byte serialDip = 11;  // rainbow
 byte speed = 20;
 byte groupSize = 5;
 float benspeed = 1.3;
-byte brightness = 4;
+byte brightness = 8;
 byte globalColour = 0;
 byte serialTimeout =0;
 
