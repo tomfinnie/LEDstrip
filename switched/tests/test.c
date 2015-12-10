@@ -2,7 +2,7 @@
 #include "TESTickle.h"
 #include <stdlib.h>
 
-void setup() { }
+
 void teardown() { }
 
 //
@@ -47,29 +47,30 @@ void fakeMode14();
 void fakeMode15();
 void fakeMode16();
 
+FuncPtr fakeJumpTable[17];
+
 // Here is our fake jump table
 // It's an array of pointers to functions that take no paramaters and do not
 // return anything (the same as the real mode functions)
-FuncPtr fakeJumpTable[] = {
-	fakeMode0,
-	fakeMode1,
-	fakeMode2,
-	fakeMode3,
-	fakeMode4,
-	fakeMode5,
-	fakeMode6,
-	fakeMode7,
-	fakeMode8,
-	fakeMode9,
-	fakeMode10,
-	fakeMode11,
-	fakeMode12,
-	fakeMode13,
-	fakeMode14,
-	fakeMode15,
-	fakeMode16
-};
-
+void setup() {
+	fakeJumpTable[0] = fakeMode0;
+	fakeJumpTable[1] = fakeMode1;
+	fakeJumpTable[2] = fakeMode2;
+	fakeJumpTable[3] = fakeMode3;
+	fakeJumpTable[4] = fakeMode4;
+	fakeJumpTable[5] = fakeMode5;
+	fakeJumpTable[6] = fakeMode6;
+	fakeJumpTable[7] = fakeMode7;
+	fakeJumpTable[8] = fakeMode8;
+	fakeJumpTable[9] = fakeMode9;
+	fakeJumpTable[10] = fakeMode10;
+	fakeJumpTable[11] = fakeMode11;
+	fakeJumpTable[12] = fakeMode12;
+	fakeJumpTable[13] = fakeMode13;
+	fakeJumpTable[14] = fakeMode14;
+	fakeJumpTable[15] = fakeMode15;
+	fakeJumpTable[16] = fakeMode16;
+}
 // Implementations for the fake mode functions
 // These work by setting their corresponding entry in the fake jump table
 // to NULL -- giving us a change to the jump table that we can later detect
@@ -150,7 +151,16 @@ void fakeMode16()
 
 // Now we can start testing the dispatchMode function!
 
-TEST(first_mode_called)
+TEST(only_first_mode_called)
 	dispatchMode(0, fakeJumpTable);
 	ASSERT_NULL(fakeJumpTable[0], "The first mode should have been called");
+	for (int i=1; i <= 16; i++)
+	{
+		ASSERT_NOT_NULL(fakeJumpTable[i], "The nth mode has been called");
+	}
 END_TEST
+
+
+
+
+

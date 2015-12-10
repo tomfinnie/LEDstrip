@@ -3,7 +3,7 @@
 #include "ledlib.c"
 
 #define NUM_LEDS 359
-//#define DEBUG 
+#define DEBUG 
 
 #ifdef DEBUG 
 	#define SERIAL_DEBUG() serialDebug()
