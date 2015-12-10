@@ -39,15 +39,9 @@ void fakeMode6();
 void fakeMode7();
 void fakeMode8();
 void fakeMode9();
-void fakeMode10();
-void fakeMode11();
-void fakeMode12();
-void fakeMode13();
-void fakeMode14();
-void fakeMode15();
-void fakeMode16();
 
-FuncPtr fakeJumpTable[17];
+#define JUMP_TABLE_SIZE 10
+FuncPtr fakeJumpTable[JUMP_TABLE_SIZE];
 
 // Here is our fake jump table
 // It's an array of pointers to functions that take no paramaters and do not
@@ -63,13 +57,7 @@ void setup() {
 	fakeJumpTable[7] = fakeMode7;
 	fakeJumpTable[8] = fakeMode8;
 	fakeJumpTable[9] = fakeMode9;
-	fakeJumpTable[10] = fakeMode10;
-	fakeJumpTable[11] = fakeMode11;
-	fakeJumpTable[12] = fakeMode12;
-	fakeJumpTable[13] = fakeMode13;
-	fakeJumpTable[14] = fakeMode14;
-	fakeJumpTable[15] = fakeMode15;
-	fakeJumpTable[16] = fakeMode16;
+
 }
 // Implementations for the fake mode functions
 // These work by setting their corresponding entry in the fake jump table
@@ -120,49 +108,22 @@ void fakeMode9()
 {
 	fakeJumpTable[9] = NULL;
 }
-void fakeMode10()
-{
-	fakeJumpTable[10] = NULL;
-}
-void fakeMode11()
-{
-	fakeJumpTable[11] = NULL;
-}
-void fakeMode12()
-{
-	fakeJumpTable[12] = NULL;
-}
-void fakeMode13()
-{
-	fakeJumpTable[13] = NULL;
-}
-void fakeMode14()
-{
-	fakeJumpTable[14] = NULL;
-}
-void fakeMode15()
-{
-	fakeJumpTable[15] = NULL;
-}
-void fakeMode16()
-{
-	fakeJumpTable[16] = NULL;
-}
+
 
 // Now we can start testing the dispatchMode function!
 
 TEST(only_first_mode_called)
-	dispatchMode(0, fakeJumpTable);
+	dispatchMode(0, fakeJumpTable, JUMP_TABLE_SIZE);
 	ASSERT_NULL(fakeJumpTable[0], "The first mode should have been called");
-	for (int i=1; i <= 16; i++)
+	for (int i=1; i < JUMP_TABLE_SIZE; i++)
 	{
 		ASSERT_NOT_NULL(fakeJumpTable[i], "The nth mode has been called");
 	}
 END_TEST
 
 TEST(under_limit_dispatch_ignored)
-	dispatchMode(-1, fakeJumpTable);
-	for (int i=0; i <= 16; i++)
+	dispatchMode(JUMP_TABLE_SIZE, fakeJumpTable, JUMP_TABLE_SIZE);
+	for (int i=0; i < JUMP_TABLE_SIZE; i++)
 	{
 		ASSERT_NOT_NULL(fakeJumpTable[i], "The nth mode has been called");
 	}

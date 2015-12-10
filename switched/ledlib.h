@@ -1,4 +1,5 @@
 // LEDlib
+#include <stdio.h>
 
 //
 // Typedefs
@@ -33,7 +34,7 @@ int calcBatteryPercentage(int batteryRaw);
 
 // Based on a byte we pass in that signifies the mode to use,
 // call the appropriate mode function in the jump table.
-void dispatchMode(byte mode, FuncPtr jumpTable[]);
+void dispatchMode(byte mode, FuncPtr jumpTable[], size_t tableSize);
 // See the .c file for implementation notes.
 // We pass in the jump table so that it can be easily mocked for
 // testing purposes.

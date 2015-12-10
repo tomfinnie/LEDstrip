@@ -34,9 +34,9 @@ int calcBatteryPercentage(int batteryRaw)
 // We pass in the jump table because this makes it possible for us to mock it
 // for testing purposes -- we can supply our own jump table which we can then
 // use to see if the correct mode (only) was called.
-void dispatchMode(byte mode, FuncPtr jumpTable[])
+void dispatchMode(byte mode, FuncPtr jumpTable[], size_t tableSize)
 {
-	if(mode<=16)
+	if(mode < tableSize)
 	{
 		jumpTable[mode]();
 	}
