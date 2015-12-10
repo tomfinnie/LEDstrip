@@ -310,8 +310,7 @@ void chaseBatterylevel()
 		delay(10);
 	}
 	batteryRaw = batteryRaw >> 4;
-	batteryRaw = 747;  // FIXME: this is for demo purposes only
-
+	
 	int batteryPercentage = calcBatteryPercentage(batteryRaw);
 
 	for(int i = 0 ; i < (NUM_LEDS*batteryPercentage)/100 ; i++ )
@@ -626,5 +625,5 @@ FuncPtr jumpTable[] =
 
 void loop()
 {
-	jumpTable[dip()]();
+	dispatchMode(dip(),jumpTable,17);
 }
