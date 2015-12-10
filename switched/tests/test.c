@@ -160,6 +160,15 @@ TEST(only_first_mode_called)
 	}
 END_TEST
 
+TEST(under_limit_dispatch_ignored)
+	dispatchMode(-1, fakeJumpTable);
+	for (int i=0; i <= 16; i++)
+	{
+		ASSERT_NOT_NULL(fakeJumpTable[i], "The nth mode has been called");
+	}
+END_TEST
+
+
 
 
 

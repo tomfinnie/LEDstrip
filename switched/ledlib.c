@@ -36,5 +36,8 @@ int calcBatteryPercentage(int batteryRaw)
 // use to see if the correct mode (only) was called.
 void dispatchMode(byte mode, FuncPtr jumpTable[])
 {
-	jumpTable[mode]();
+	if(mode<=16)
+	{
+		jumpTable[mode]();
+	}
 }
