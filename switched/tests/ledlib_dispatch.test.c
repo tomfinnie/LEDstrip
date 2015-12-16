@@ -2,22 +2,7 @@
 #include "TESTickle.h"
 #include <stdlib.h>
 
-
 void teardown() { }
-
-//
-// Battery Percentage Calculation
-//
-
-// FIXME these are not complete!
-
-TEST(upper_limit_over)
-    ASSERT_EQUAL(calcBatteryPercentage(861), 100, "%d", "Readings >=861 are 100%");
-END_TEST
-
-TEST(upper_limit_at)
-    ASSERT_EQUAL(calcBatteryPercentage(860), 100, "%d", "Readings >=861 are 100%");
-END_TEST
 
 
 //
@@ -115,22 +100,16 @@ void fakeMode9()
 TEST(only_first_mode_called)
 	dispatchMode(0, fakeJumpTable, JUMP_TABLE_SIZE);
 	ASSERT_NULL(fakeJumpTable[0], "The first mode should have been called");
-	for (int i=1; i < JUMP_TABLE_SIZE; i++)
+	for (int i = 1; i < JUMP_TABLE_SIZE; i++)
 	{
 		ASSERT_NOT_NULL(fakeJumpTable[i], "The nth mode has been called");
 	}
 END_TEST
 
-TEST(under_limit_dispatch_ignored)
+TEST(over_limit_dispatch_ignored)
 	dispatchMode(JUMP_TABLE_SIZE, fakeJumpTable, JUMP_TABLE_SIZE);
-	for (int i=0; i < JUMP_TABLE_SIZE; i++)
+	for (int i = 0; i < JUMP_TABLE_SIZE; i++)
 	{
 		ASSERT_NOT_NULL(fakeJumpTable[i], "The nth mode has been called");
 	}
 END_TEST
-
-
-
-
-
-
