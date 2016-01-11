@@ -38,3 +38,5 @@ void dispatchMode(byte mode, FuncPtr jumpTable[], size_t tableSize);
 // See the .c file for implementation notes.
 // We pass in the jump table so that it can be easily mocked for
 // testing purposes.
+
+void updateGlobals (byte globals[], byte operation_Variable ,byte value);

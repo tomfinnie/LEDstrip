@@ -41,3 +41,19 @@ void dispatchMode(byte mode, FuncPtr jumpTable[], size_t tableSize)
 		jumpTable[mode]();
 	}
 }
+
+void updateGlobals (byte globals[], byte operation_Variable ,byte value)
+{
+	globals[operation_Variable] = value;
+}
+
+
+
+
+
+
+
+
+
+
+
