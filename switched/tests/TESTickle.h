@@ -26,8 +26,8 @@
             printf("  severity: fail\n"); \
             if (result.data_specified) { \
                 printf("  data:\n"); \
-                printf("    got: %s\n", result.got); \
-                printf("    expect: %s\n", result.expect); \
+                printf("    got: '%s'\n", result.got); \
+                printf("    expect: '%s'\n", result.expect); \
             } \
             printf("  ...\n"); \
         } \

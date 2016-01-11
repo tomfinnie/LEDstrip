@@ -1,3 +1,4 @@
-*.o
-*.exe
-*_runner.c
+switched/tests/bin
+switched/tests/obj
+switched/tests/*_runner.c
+*.swp
