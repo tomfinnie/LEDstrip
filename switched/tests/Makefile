@@ -15,10 +15,7 @@ endif
 ledlib.o: ../ledlib.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
-ledlib_battery.test$(DOTEXE): $(call test_files_for,ledlib_battery.test.c) ledlib.o
-	$(CC) $(CFLAGS) -o $@ $^
-
-ledlib_dispatch.test$(DOTEXE): $(call test_files_for,ledlib_dispatch.test.c) ledlib.o
+%.test$(DOTEXE): $(call test_files_for,%.test.c) ledlib.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 test: ledlib_battery.test$(DOTEXE) ledlib_dispatch.test$(DOTEXE)
